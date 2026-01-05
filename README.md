@@ -5,6 +5,7 @@ A modern Next.js frontend for the Stylo AI MVP that provides an intuitive interf
 ## Features
 
 - 🔐 **Firebase Authentication** - Secure Google login with automatic token management
+- 📀**Firebase Storage** - Secure Google Google storage for all the data
 - 🎤 **Voice Assistant** - Speech-to-text and text-to-speech functionality
 - 👔 **Wardrobe Management** - Add, edit, and delete clothing items with image upload
 - 📝 **Style Questionnaire** - Multi-step form for collecting user preferences
@@ -23,12 +24,18 @@ A modern Next.js frontend for the Stylo AI MVP that provides an intuitive interf
 - **React Dropzone** - File upload handling
 - **Lucide React** - Icon library
 
+## Google Technologies Used
+
+- **Firebase** - React framework with App Router
+- **Gemini** - Type-safe development
+
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm
 - Firebase project with Authentication enabled
+- Gemini Api Key
 - Backend API running (see backend README)
 - Cloudinary account for image uploads
 
@@ -224,6 +231,7 @@ The app can be deployed to any platform that supports Next.js:
 | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket | Yes |
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID | Yes |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase app ID | Yes |
+| `GEMINI_API_KEY` | Gemini | Yes |
 | `NEXT_PUBLIC_API_URL` | Backend API URL | Yes |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | Yes |
 | `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Cloudinary upload preset | Yes |
