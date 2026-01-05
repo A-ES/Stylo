@@ -26,8 +26,8 @@ A modern Next.js frontend for the Stylo AI MVP that provides an intuitive interf
 
 ## Google Technologies Used
 
-- **Firebase** - React framework with App Router
-- **Gemini** - Type-safe development
+- **Firebase** 
+- **Gemini** 
 
 ## Getting Started
 
