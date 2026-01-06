@@ -20,13 +20,18 @@ load_dotenv()
 
 
 # --- Robust Firebase credentials: support file path or JSON string --- #
-firebase_creds = os.getenv("FIREBASE_CREDENTIALS")
+firebase_creds = {
+    "type": "service_account",
+    "project_id": os.environ["FIREBASE_PROJECT_ID"],
+    "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
+    "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+    "token_uri": "https://oauth2.googleapis.com/token"
+}
+
 if not firebase_admin._apps:
-    if firebase_creds and firebase_creds.strip().startswith("{"):
-        cred = credentials.Certificate(json.loads(firebase_creds))
-    else:
-        cred = credentials.Certificate(firebase_creds)
+    cred = credentials.Certificate(firebase_creds)
     firebase_admin.initialize_app(cred)
+
 
 db = firestore.client()
 
@@ -163,7 +168,7 @@ def add_wardrobe_item(item: AddWardrobeItem):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding wardrobe item: {str(e)}")
 
-@app.get("/api/wardrobe/{userId}")
+@app.get("/api/wardrobe/item/{item_id}")
 def get_wardrobe(userId: str):
     try:
         items_ref = db.collection("wardrobes").document(userId).collection("items").stream()
@@ -206,7 +211,10 @@ def recommend_outfit(req: RecommendRequest):
         wardrobe_items = [clean_firestore(item.to_dict()) for item in items_ref]
         prompt = f"""
 You are Stylo, a professional AI Fashion Stylist.\nThe client’s wardrobe: {json.dumps(wardrobe_items)}.\nSuggest a complete outfit using available items. If something is missing, recommend it.\n"""
-        ai_reply = openrouter_chat(prompt)
+        ai_reply = openrouter_chat([
+    {"role": "user", "content": prompt}
+])
+
         return {"recommendation": ai_reply.strip()}
     except Exception as e:
         import traceback
