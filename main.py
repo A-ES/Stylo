@@ -52,17 +52,26 @@ app.add_middleware(
 )
 
 # ---------------- Auth ---------------- #
-ALLOW_MOCK_TOKENS = os.getenv("ALLOW_MOCK_TOKENS", "false").lower() == "true"
 
-def get_current_user(authorization: str = Header(...)):
+
+def get_current_user(authorization: str = Header(None)):
+    if not authorization:
+        if ALLOW_MOCK_TOKENS:
+            return {"uid": "mock-user"}
+        raise HTTPException(status_code=401, detail="Missing auth header")
+
     token = authorization.replace("Bearer ", "")
     try:
         if ALLOW_MOCK_TOKENS and token.startswith("mock-token-"):
             return {"uid": token.replace("mock-token-", "")}
+
         decoded = auth.verify_id_token(token)
         return decoded
     except Exception as e:
+        if ALLOW_MOCK_TOKENS:
+            return {"uid": "mock-user"}
         raise HTTPException(status_code=401, detail=f"Invalid auth token: {e}")
+
 
 # ---------------- Models ---------------- #
 class WardrobeItem(BaseModel):
