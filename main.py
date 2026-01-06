@@ -17,6 +17,7 @@ from firebase_admin import credentials, firestore
 
 # ---------------- Env + Firebase Init ---------------- #
 load_dotenv()
+ALLOW_MOCK_TOKENS = True
 
 
 # --- Robust Firebase credentials: support file path or JSON string --- #
@@ -168,14 +169,7 @@ def add_wardrobe_item(item: AddWardrobeItem):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding wardrobe item: {str(e)}")
 
-@app.get("/api/wardrobe/item/{item_id}")
-def get_wardrobe(userId: str):
-    try:
-        items_ref = db.collection("wardrobes").document(userId).collection("items").stream()
-        wardrobe = [{**item.to_dict(), "id": item.id} for item in items_ref]
-        return {"items": wardrobe}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching wardrobe: {str(e)}")
+
 @app.delete("/api/wardrobe/{userId}/{itemId}")
 def delete_wardrobe_item(userId: str, itemId: str):
     try:
@@ -184,14 +178,26 @@ def delete_wardrobe_item(userId: str, itemId: str):
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting wardrobe item: {str(e)}")
+@app.get("/api/wardrobe/{userId}")
+def get_wardrobe(userId: str, user=Depends(get_current_user)):
+    # Allow mock tokens or real Firebase users
+    if not ALLOW_MOCK_TOKENS:
+        if user.get("uid") != userId:
+            raise HTTPException(status_code=403, detail="Unauthorized")
 
-@app.get("/api/wardrobe/{item_id}")
-def get_wardrobe_item(item_id: str, user=Depends(get_current_user)):
-    uid = user["uid"]
-    doc = db.collection("users").document(uid).collection("wardrobe").document(item_id).get()
-    if not doc.exists:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return doc.to_dict() | {"id": doc.id}
+    try:
+        items_ref = (
+            db.collection("wardrobes")
+              .document(userId)
+              .collection("items")
+              .stream()
+        )
+        wardrobe = [{**item.to_dict(), "id": item.id} for item in items_ref]
+        return {"items": wardrobe}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
 # ---------------- Outfit Recommendation ---------------- #
 @app.post("/api/recommend")
